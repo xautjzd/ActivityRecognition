@@ -4,3 +4,10 @@
 /.classpath
 svm_result
 svm_train_set.model
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
