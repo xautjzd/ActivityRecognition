@@ -10,6 +10,7 @@
 	<name>activityrecognition</name>
 	<url>http://maven.apache.org</url>
 
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -28,6 +29,32 @@
 			<version>3.17</version>
 		</dependency>
 
+		<!-- Decision Tree -->
+		<dependency>
+			<groupId>quickml</groupId>
+			<artifactId>quickml</artifactId>
+			<version>0.4.8.8</version>
+		</dependency>
+
 	</dependencies>
+	
+	<!-- 解决依赖包无法下载(maven本地库需要配置代理)  -->
+	<repositories>
+		<repository>
+			<id>quickml-maven-repo</id>
+			<name>Sanity's Maven repository on GitHub</name>
+			<url>http://sanity.github.com/maven-repo/repository</url>
+		</repository>
+		<repository>
+			<id>stats-util-maven-repo</id>
+			<name>Sanity's Maven repository on GitHub</name>
+			<url>http://maven.twttr.com/com/twitter</url>
+		</repository>
+		<repository>
+			<id>guice-maven-repo</id>
+			<name>Sanity's Maven repository on GitHub</name>
+			<url>http://central.maven.org/maven2</url>
+		</repository>
+	</repositories>
 
 </project>
