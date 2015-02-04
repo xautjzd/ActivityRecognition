@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://202.200.119.168/sensor</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password">19891207</property>
+		<property name="show_sql">false</property>
+
+		<!-- JDBC connection pool (use the built-in) -->
+    	<!-- <property name="connection.pool_size">1</property>
+    	<property name="current_session_context_class">thread</property> -->
+    	
+		<mapping class="edu.xautjzd.activityrecognition.decisiontree.Attribute" />
+	</session-factory>
+</hibernate-configuration>

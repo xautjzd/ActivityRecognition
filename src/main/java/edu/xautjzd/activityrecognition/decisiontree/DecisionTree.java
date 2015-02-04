@@ -9,7 +9,14 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 import quickml.data.AttributesMap;
 import quickml.data.InstanceWithAttributesMap;
@@ -20,42 +27,62 @@ public class DecisionTree {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		List<InstanceWithAttributesMap> trainingSets = new ArrayList<InstanceWithAttributesMap>();
-		AttributesMap attributes = new AttributesMap();
-		attributes.put("hunger", 8);
-		attributes.put("color", "red");
-		InstanceWithAttributesMap item = new InstanceWithAttributesMap(attributes,"angry");
-		trainingSets.add(item);
 		
-		attributes.put("hunger", 6);
-		attributes.put("color", "red");
-		item = new InstanceWithAttributesMap(attributes,"angry");
-		trainingSets.add(item);
+		DecisionTree dt = new DecisionTree();	
+	//	dt.train();
+		dt.predict("/decisiontree_model.txt");
 		
-		attributes.put("hunger", 7);
-		attributes.put("color", "red");
-		item = new InstanceWithAttributesMap(attributes,"angry");
-		trainingSets.add(item);
+	}
+	
+	/**
+	 * 訓練方法
+	 */
+	public void train() {
 		
-		attributes.put("hunger", 7);
-		attributes.put("color", "blue");
-		item = new InstanceWithAttributesMap(attributes,"not angry");
-		trainingSets.add(item);
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		session.beginTransaction();
 		
-		attributes.put("hunger", 2);
-		attributes.put("color", "red");
-		item = new InstanceWithAttributesMap(attributes,"not angry");
-		trainingSets.add(item);
+		// 待填充的訓練集
+		List<InstanceWithAttributesMap> trainingSet = new ArrayList<InstanceWithAttributesMap>();
 		
-		attributes.put("hunger", 2);
-		attributes.put("color", "blue");
-		item = new InstanceWithAttributesMap(attributes,"not angry");
+		// HQL中只有類、對象和屬性的概念，沒有表和字段的概念，Attribute為類名
+		Query query = session.createQuery("from Attribute");
+		Iterator<Attribute> it = query.setMaxResults(512).iterate();  // 獲取前512條記錄
+		while (it.hasNext()) {
+			Attribute a = it.next();
+			AttributesMap map = new AttributesMap();
+			map.put("X_Average", a.getX_Average());
+			map.put("Y_Average", a.getY_Average());
+			map.put("Z_Average", a.getZ_Average());
+			
+			map.put("X_Deviation", a.getX_Deviation());
+			map.put("Y_Deviation", a.getY_Deviation());
+			
+			map.put("Z_Deviation", a.getZ_Deviation());
+			map.put("XY_Correlation", a.getXY_Correlation());
+			map.put("YZ_Correlation", a.getYZ_Correlation());
+			
+			map.put("XZ_Correlation", a.getXZ_Correlation());
+			map.put("X_Skewness", a.getX_Skewness());
+			map.put("Y_Skewness", a.getY_Skewness());
+			
+			map.put("Z_Skewness", a.getZ_Skewness());
+			map.put("X_Kurtosis", a.getX_Kurtosis());
+			map.put("Y_Kurtosis", a.getY_Kurtosis());
+			map.put("Z_Kurtosis", a.getZ_Kurtosis());
+			
+			InstanceWithAttributesMap item = new InstanceWithAttributesMap(map, a.getAction());
+			trainingSet.add(item);
+		}
 		
-		final RandomForest randomForest = new RandomForestBuilder().buildPredictiveModel(trainingSets);
+		session.getTransaction().commit();
+		session.close();
+		
+		final RandomForest randomForest = new RandomForestBuilder().buildPredictiveModel(trainingSet);
 		
 		
 		try {
-			FileOutputStream fs = new FileOutputStream("test.txt");
+			FileOutputStream fs = new FileOutputStream("src/main/resources/decisiontree_model.txt");
 			ObjectOutputStream os = new ObjectOutputStream(fs);
 			os.writeObject(randomForest);
 			os.flush();
@@ -63,24 +90,75 @@ public class DecisionTree {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}  
-		
-		 
-        try {
-        	FileInputStream fs = new FileInputStream("test.txt"); 
+		} 
+	}
+	
+	/**
+	 * 
+	 * @param decisiontree_model
+	 */
+	public void predict(String decisiontree_model) {
+		try {
+        	
+			FileInputStream fs = new FileInputStream(this.getClass().getResource(decisiontree_model).getFile());
 			ObjectInputStream is = new ObjectInputStream(fs);
 			RandomForest randomForest1 = (RandomForest)is.readObject();
 			
-			AttributesMap test = new AttributesMap();
-			test.put("hunger", 20);
-			test.put("color", "red");
-			System.out.println("Prediction: " + randomForest1.getProbability(attributes, "not angry"));
+			Session session = HibernateUtil.getSessionFactory().openSession();
+			session.beginTransaction();
 			
+			// 獲取動作集合
+			Query query = session.createQuery("select distinct Action from Attribute");
+			List <String> actions = query.list();
+			
+			// 獲取待測數據集
+			query = session.createQuery("from Attribute");
+			Iterator<Attribute> it = query.setFirstResult(512).iterate(); 
+			int i = 0;
+			
+			while (it.hasNext()) {
+				Attribute a = it.next();
+				AttributesMap map = new AttributesMap();
+				map.put("X_Average", a.getX_Average());
+				map.put("Y_Average", a.getY_Average());
+				map.put("Z_Average", a.getZ_Average());
+				
+				map.put("X_Deviation", a.getX_Deviation());
+				map.put("Y_Deviation", a.getY_Deviation());			
+				map.put("Z_Deviation", a.getZ_Deviation());
+				
+				map.put("XY_Correlation", a.getXY_Correlation());
+				map.put("YZ_Correlation", a.getYZ_Correlation());
+				map.put("XZ_Correlation", a.getXZ_Correlation());
+				
+				map.put("X_Skewness", a.getX_Skewness());
+				map.put("Y_Skewness", a.getY_Skewness());				
+				map.put("Z_Skewness", a.getZ_Skewness());
+				
+				map.put("X_Kurtosis", a.getX_Kurtosis());
+				map.put("Y_Kurtosis", a.getY_Kurtosis());
+				map.put("Z_Kurtosis", a.getZ_Kurtosis());
+				
+				// 獲取各動作對應的概率
+				HashMap<String,Double> pair=new HashMap<String, Double>();
+				for (String action: actions) {
+					pair.put(action, randomForest1.getProbability(map, action));
+				}
+				// 獲取最大概率的動作
+				Map.Entry<String, Double> maxEntry = null;
+				for (Map.Entry<String, Double> entry: pair.entrySet()) {
+					if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+				        maxEntry = entry;
+				    }
+				}
+				System.out.println("Test " + ++i + " Preditcted:" + maxEntry.getKey() + "Actual:" + a.getAction());	
+			}
+			
+			session.getTransaction().commit();
 			is.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}  
 	}
-
 }
