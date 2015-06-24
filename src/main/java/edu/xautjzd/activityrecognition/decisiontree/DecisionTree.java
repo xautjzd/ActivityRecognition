@@ -6,6 +6,7 @@ package edu.xautjzd.activityrecognition.decisiontree;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -27,9 +28,8 @@ public class DecisionTree {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
 		DecisionTree dt = new DecisionTree();	
-	//	dt.train();
+		dt.train();
 		dt.predict("/decisiontree_model.txt");
 		
 	}

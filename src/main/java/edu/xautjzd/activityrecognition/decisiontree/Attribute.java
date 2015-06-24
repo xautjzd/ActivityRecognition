@@ -12,7 +12,7 @@ public class Attribute {
 	@Id 
 	@GeneratedValue
 	private Integer Id;      // 自增主鍵
-	@Column(name = "Person")
+	@Column(name = "Person", nullable=false, length=50)
 	private String Person;  // 采楊者
 	private String Action;  // 動作 
 	
